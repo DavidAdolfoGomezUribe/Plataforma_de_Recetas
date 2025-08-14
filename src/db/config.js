@@ -1,7 +1,7 @@
 //imports 
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv"
-import { error, log } from "console";
+import { log } from "console";
 
 //recibing environment variables from .env
 dotenv.config();
@@ -25,7 +25,7 @@ export async function connect() {
 
 export function getDB(){
     if(!db){
-        throw new error("Data not found")
+        throw new Error("Data not found")
     }
     return db;
 }
