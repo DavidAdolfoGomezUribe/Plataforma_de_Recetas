@@ -3,7 +3,7 @@ import express from "express"
 import {connect,getDB} from "./src/db/config.js"
 import {log} from "console"
 import apiRouter from "./src/routes/index.js"
-log("ok")
+
 
 
 // const db = await getDB().collection("ingredientes").find().toArray()

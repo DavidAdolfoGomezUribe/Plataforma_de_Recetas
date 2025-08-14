@@ -1,7 +1,7 @@
-import { error } from "console";
+
 import { Router } from "express";
 import { getDB } from "../db/config.js";
-import asyncHandler from "../utils/asyncHandler.js";
+import asyncHandler from "../utils/asyncHandler.js";//para evitar el uso execivo de trycath
 import { log } from "console";
 
 const router = Router();
@@ -190,8 +190,6 @@ router.get(
     
   })
 );
-
-
 
 
 
