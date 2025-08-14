@@ -14,7 +14,7 @@ router.get("/", asyncHandler(async (req, res, next) => {
 //Get one user by id
 router.get('/:id', asyncHandler(async (req, res) => {
     const userId = parseInt(req.params.id, 10);
-    
+
     if (isNaN(userId)) {
         return res.status(400).json({ message: 'Invalid user id' });
     }
@@ -67,52 +67,133 @@ router.post("/", asyncHandler(async (req, res, next) => {
 
 // Update one user by id
 router.put(
-  '/:id',
-  asyncHandler(async (req, res) => {
-    const userId = parseInt(req.params.id, 10);
-    const { nombre } = req.body;
+    '/:id',
+    asyncHandler(async (req, res) => {
+        const userId = parseInt(req.params.id, 10);
+        const { nombre } = req.body;
 
-    if (isNaN(userId)) {
-      return res.status(400).json({ message: 'Invalid user id' });
-    }
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user id' });
+        }
 
-    if (!nombre) {
-      return res.status(400).json({ message: 'Nombre es requerido' });
-    }
+        if (!nombre) {
+            return res.status(400).json({ message: 'Nombre es requerido' });
+        }
 
-    const result = await getDB()
-      .collection('usuarios')
-      .updateOne({ id: userId }, { $set: { nombre } });
+        const result = await getDB()
+            .collection('usuarios')
+            .updateOne({ id: userId }, { $set: { nombre } });
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    res.json({ message: 'Updating user ok' });
-  })
+        res.json({ message: 'Updating user ok' });
+    })
 );
 
 //deleting one user by id
 router.delete(
-  '/:id',
+    '/:id',
+    asyncHandler(async (req, res) => {
+        const userId = parseInt(req.params.id, 10);
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user id' });
+        }
+
+        const result = await getDB()
+            .collection('usuarios')
+            .deleteOne({ id: userId });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'Delete user ok' });
+    })
+);
+
+//Adding new recipt
+
+router.post(
+    '/:id/recetas',
+    asyncHandler(async (req, res) => {
+        const userId = parseInt(req.params.id, 10);
+        const { titulo, descripcion, ingredientes } = req.body;
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user id' });
+        }
+
+        if (!titulo || !descripcion) {
+            return res.status(400).json({ message: 'Tittle and description its required' });
+        }
+
+        
+        const nuevaReceta = {
+            titulo,
+            descripcion,
+            ingredientes: Array.isArray(ingredientes) ? ingredientes : []
+        };
+
+        
+        const result = await getDB()
+            .collection('usuarios')
+            .updateOne(
+                { id: userId },
+                { $push: { recetas: nuevaReceta } }
+            );
+
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(201).json({
+            message: 'Recip creation ok',
+            receta: nuevaReceta,
+        });
+    })
+);
+
+// GET /api/users/:id/recetas
+router.get(
+  '/:id/recetas',
   asyncHandler(async (req, res) => {
     const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) return res.status(400).json({ message: 'Invalid user id' });
 
-    if (isNaN(userId)) {
-      return res.status(400).json({ message: 'Invalid user id' });
-    }
+    const user = await getDB().collection('usuarios').findOne(
+      { id: userId },
+      { projection: { _id: 0, recetas: 1 } } 
+    );
 
-    const result = await getDB()
-      .collection('usuarios')
-      .deleteOne({ id: userId });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json({ message: 'Delete user ok' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.recetas ?? []);
   })
 );
+
+// GET /api/users/by-name/:nombre/recetas
+router.get(
+  '/by-name/:nombre/recetas',
+  asyncHandler(async (req, res) => {
+    const { nombre } = req.params;
+
+    const user = await getDB()
+      .collection('usuarios')
+      .findOne({ nombre:nombre }, { projection: { _id: 0, recetas: 1 } });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user.recetas ?? []);
+    
+  })
+);
+
+
+
+
 
 
 export default router
