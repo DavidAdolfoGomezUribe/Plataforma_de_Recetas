@@ -84,16 +84,16 @@ async function seedDatabase() {
 
     // Insertar ingredientes
     const ingredientes = [
-      { nombre: "lechuga", descripcion: "Vegetal verde para ensaladas." },
-      { nombre: "tomate", descripcion: "Fruto rojo, usado en ensaladas y salsas." },
-      { nombre: "arroz", descripcion: "Cereal básico en muchas cocinas." },
-      { nombre: "pollo", descripcion: "Carne blanca versátil y nutritiva." },
-      { nombre: "pimiento", descripcion: "Hortaliza dulce o picante." },
-      { nombre: "guisantes", descripcion: "Legumbre verde y dulce." },
-      { nombre: "zanahoria", descripcion: "Raíz naranja, rica en betacaroteno." },
-      { nombre: "papa", descripcion: "Tubérculo versátil para múltiples recetas." },
-      { nombre: "chorizo", descripcion: "Embutido de carne de cerdo condimentada." },
-      { nombre: "mango", descripcion: "Fruta tropical dulce y jugosa." }
+        { id: 1, nombre: "lechuga", descripcion: "Vegetal verde para ensaladas." },
+        { id: 2, nombre: "tomate", descripcion: "Fruto rojo, usado en ensaladas y salsas." },
+        { id: 3, nombre: "arroz", descripcion: "Cereal básico en muchas cocinas." },
+        { id: 4, nombre: "pollo", descripcion: "Carne blanca versátil y nutritiva." },
+        { id: 5, nombre: "pimiento", descripcion: "Hortaliza dulce o picante." },
+        { id: 6, nombre: "guisantes", descripcion: "Legumbre verde y dulce." },
+        { id: 7, nombre: "zanahoria", descripcion: "Raíz naranja, rica en betacaroteno." },
+        { id: 8, nombre: "papa", descripcion: "Tubérculo versátil para múltiples recetas." },
+        { id: 9, nombre: "chorizo", descripcion: "Embutido de carne de cerdo condimentada." },
+        { id: 10, nombre: "mango", descripcion: "Fruta tropical dulce y jugosa." }
     ];
     await db.collection('ingredientes').insertMany(ingredientes);
 
