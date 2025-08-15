@@ -37,15 +37,15 @@ router.get('/:id', asyncHandler(async (req, res) => {
 router.delete(
     '/:id',
     asyncHandler(async (req, res) => {
-        const userId = parseInt(req.params.id, 10);
+        const recipId = parseInt(req.params.id, 10);
 
-        if (isNaN(userId)) {
+        if (isNaN(recipId)) {
             return res.status(400).json({ message: 'Invalid recipe id' });
         }
 
         const result = await getDB()
-            .collection('usuarios')
-            .deleteOne({ id: userId });
+            .collection('recetas')
+            .deleteOne({ id: recipId });
 
         if (result.deletedCount === 0) {
             return res.status(404).json({ message: 'Recipe not found' });
@@ -54,48 +54,78 @@ router.delete(
         res.json({ message: 'Delete recipe ok' });
     })
 );
-//en desarrollo
+
 //crear una receta
+
 router.post(
-    '/:id/recetas',
-    asyncHandler(async (req, res) => {
-        const userId = parseInt(req.params.id, 10);
-        const { titulo, descripcion, ingredientes } = req.body;
+  '/',
+  asyncHandler(async (req, res) => {
+    const { titulo, descripcion, ingredientes } = req.body;
 
-        if (isNaN(userId)) {
-            return res.status(400).json({ message: 'Invalid user id' });
-        }
+    if (!titulo || !descripcion) {
+      return res.status(400).json({ message: 'Title and description are required' });
+    }
 
-        if (!titulo || !descripcion) {
-            return res.status(400).json({ message: 'Tittle and description its required' });
-        }
+    const db = getDB();
+    const recetasCollection = db.collection('recetas');
 
-        
-        const nuevaReceta = {
-            titulo,
-            descripcion,
-            ingredientes: Array.isArray(ingredientes) ? ingredientes : []
-        };
+    const lastRecipe = await recetasCollection
+      .find()
+      .sort({ id: -1 })
+      .limit(1)
+      .toArray();
 
-        
-        const result = await getDB()
-            .collection('usuarios')
-            .updateOne(
-                { id: userId },
-                { $push: { recetas: nuevaReceta } }
-            );
+    const newId = lastRecipe.length > 0 ? lastRecipe[0].id + 1 : 1;
 
+    const nuevaReceta = {
+      id: newId,
+      titulo,
+      descripcion,
+      ingredientes: Array.isArray(ingredientes) ? ingredientes : [],
+      createdAt: new Date(),
+    };
 
-        if (result.matchedCount === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+    const result = await recetasCollection.insertOne(nuevaReceta);
 
-        res.status(201).json({
-            message: 'Recip creation ok',
-            receta: nuevaReceta,
-        });
-    })
+    res.status(201).json({
+      message: 'Recipe created successfully',
+      receta: { ...nuevaReceta, _id: result.insertedId },
+    });
+  })
 );
+
+//edit title and description
+router.put(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const recetaId = parseInt(req.params.id, 10);
+    const { titulo, descripcion } = req.body;
+
+    if (isNaN(recetaId)) {
+      return res.status(400).json({ message: 'Invalid recipe id' });
+    }
+
+    if (!titulo && !descripcion) {
+      return res.status(400).json({ message: 'You must provide a title or description to update' });
+    }
+
+    const updateFields = {};
+    if (titulo) updateFields.titulo = titulo;
+    if (descripcion) updateFields.descripcion = descripcion;
+
+    
+    const result = await getDB()
+      .collection('recetas')
+      .updateOne({ id: recetaId }, { $set: updateFields });
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+
+    res.json({ message: 'Recipe updated successfully' });
+  })
+);
+
 
 
 export default router
